@@ -1,42 +1,7 @@
 package io.modelcontextprotocol.kotlin.sdk.client
 
-import io.modelcontextprotocol.kotlin.sdk.CallToolRequest
-import io.modelcontextprotocol.kotlin.sdk.CallToolResult
-import io.modelcontextprotocol.kotlin.sdk.CallToolResultBase
-import io.modelcontextprotocol.kotlin.sdk.ClientCapabilities
-import io.modelcontextprotocol.kotlin.sdk.ClientNotification
-import io.modelcontextprotocol.kotlin.sdk.ClientRequest
-import io.modelcontextprotocol.kotlin.sdk.ClientResult
-import io.modelcontextprotocol.kotlin.sdk.CompatibilityCallToolResult
-import io.modelcontextprotocol.kotlin.sdk.CompleteRequest
-import io.modelcontextprotocol.kotlin.sdk.CompleteResult
-import io.modelcontextprotocol.kotlin.sdk.EmptyRequestResult
-import io.modelcontextprotocol.kotlin.sdk.GetPromptRequest
-import io.modelcontextprotocol.kotlin.sdk.GetPromptResult
-import io.modelcontextprotocol.kotlin.sdk.Implementation
-import io.modelcontextprotocol.kotlin.sdk.InitializeRequest
-import io.modelcontextprotocol.kotlin.sdk.InitializeResult
-import io.modelcontextprotocol.kotlin.sdk.InitializedNotification
-import io.modelcontextprotocol.kotlin.sdk.LATEST_PROTOCOL_VERSION
-import io.modelcontextprotocol.kotlin.sdk.ListPromptsRequest
-import io.modelcontextprotocol.kotlin.sdk.ListPromptsResult
-import io.modelcontextprotocol.kotlin.sdk.ListResourceTemplatesRequest
-import io.modelcontextprotocol.kotlin.sdk.ListResourceTemplatesResult
-import io.modelcontextprotocol.kotlin.sdk.ListResourcesRequest
-import io.modelcontextprotocol.kotlin.sdk.ListResourcesResult
-import io.modelcontextprotocol.kotlin.sdk.ListToolsRequest
-import io.modelcontextprotocol.kotlin.sdk.ListToolsResult
-import io.modelcontextprotocol.kotlin.sdk.LoggingLevel
+import io.modelcontextprotocol.kotlin.sdk.*
 import io.modelcontextprotocol.kotlin.sdk.LoggingMessageNotification.SetLevelRequest
-import io.modelcontextprotocol.kotlin.sdk.Method
-import io.modelcontextprotocol.kotlin.sdk.PingRequest
-import io.modelcontextprotocol.kotlin.sdk.ReadResourceRequest
-import io.modelcontextprotocol.kotlin.sdk.ReadResourceResult
-import io.modelcontextprotocol.kotlin.sdk.RootsListChangedNotification
-import io.modelcontextprotocol.kotlin.sdk.SUPPORTED_PROTOCOL_VERSIONS
-import io.modelcontextprotocol.kotlin.sdk.ServerCapabilities
-import io.modelcontextprotocol.kotlin.sdk.SubscribeRequest
-import io.modelcontextprotocol.kotlin.sdk.UnsubscribeRequest
 import io.modelcontextprotocol.kotlin.sdk.shared.Protocol
 import io.modelcontextprotocol.kotlin.sdk.shared.ProtocolOptions
 import io.modelcontextprotocol.kotlin.sdk.shared.RequestOptions
@@ -45,6 +10,7 @@ import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
+
 /**
  * Options for configuring the MCP client.
  *
@@ -60,7 +26,7 @@ public class ClientOptions(
  * An MCP client on top of a pluggable transport.
  *
  * The client automatically performs the initialization handshake with the server when [connect] is called.
- * After initialization, [getServerCapabilities] and [getServerVersion] provide details about the connected server.
+ * After initialization, [severCapabilities] and [serverVersion] provide details about the connected server.
  *
  * You can extend this class with custom request/notification/result types if needed.
  *
@@ -70,10 +36,24 @@ public class ClientOptions(
 public open class Client(
     private val clientInfo: Implementation,
     options: ClientOptions = ClientOptions(),
-) : Protocol<ClientRequest, ClientNotification, ClientResult>(options) {
+) : Protocol(options) {
 
-    private var serverCapabilities: ServerCapabilities? = null
-    private var serverVersion: Implementation? = null
+    /**
+     * Retrieves the server's reported capabilities after the initialization process completes.
+     *
+     * @return The server's capabilities, or `null` if initialization is not yet complete.
+     */
+    public var serverCapabilities: ServerCapabilities? = null
+        private set
+
+    /**
+     * Retrieves the server's reported version information after initialization.
+     *
+     * @return Information about the server's implementation, or `null` if initialization is not yet complete.
+     */
+    public var serverVersion: Implementation? = null
+        private set
+
     private val capabilities: ClientCapabilities = options.capabilities
 
     protected fun assertCapability(capability: String, method: String) {
@@ -124,23 +104,6 @@ public open class Client(
         }
     }
 
-    /**
-     * Retrieves the server's reported capabilities after the initialization process completes.
-     *
-     * @return The server's capabilities, or `null` if initialization is not yet complete.
-     */
-    public fun getServerCapabilities(): ServerCapabilities? {
-        return serverCapabilities
-    }
-
-    /**
-     * Retrieves the server's reported version information after initialization.
-     *
-     * @return Information about the server's implementation, or `null` if initialization is not yet complete.
-     */
-    public fun getServerVersion(): Implementation? {
-        return serverVersion
-    }
 
     override fun assertCapabilityForMethod(method: Method) {
         when (method) {

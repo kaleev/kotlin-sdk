@@ -1,13 +1,12 @@
 package io.modelcontextprotocol.kotlin.sdk.server
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.modelcontextprotocol.kotlin.sdk.ServerCapabilities
-import kotlinx.coroutines.CompletableDeferred
-import kotlinx.serialization.json.JsonObject
 import io.modelcontextprotocol.kotlin.sdk.*
 import io.modelcontextprotocol.kotlin.sdk.shared.Protocol
 import io.modelcontextprotocol.kotlin.sdk.shared.ProtocolOptions
 import io.modelcontextprotocol.kotlin.sdk.shared.RequestOptions
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.serialization.json.JsonObject
 
 private val logger = KotlinLogging.logger {}
 
@@ -37,7 +36,7 @@ public open class Server(
     private val serverInfo: Implementation,
     options: ServerOptions,
     public var onCloseCallback: (() -> Unit)? = null
-) : Protocol<ServerRequest, ServerNotification, ServerResult>(options) {
+) : Protocol(options) {
 
     /**
      * The client's reported capabilities after initialization.
@@ -112,7 +111,7 @@ public open class Server(
      * Called when the server connection is closing.
      * Invokes [onCloseCallback] if set.
      */
-    override fun onclose() {
+    override fun onClose() {
         logger.info { "Server connection closing" }
         onCloseCallback?.invoke()
     }
